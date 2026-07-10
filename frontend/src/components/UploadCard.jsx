@@ -14,6 +14,29 @@ function UploadCard() {
     setSelectedFile(null);
   };
 
+  const handleAnalyze = async () => {
+  if (!selectedFile) {
+    alert("Please select an audio file first.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("audio", selectedFile);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    console.log("Backend Response:", data);
+  } catch (error) {
+    console.error("Upload failed:", error);
+  }
+};
+
   return (
     <div className="upload-card">
       <h2>Upload Your Recording</h2>
@@ -43,7 +66,10 @@ function UploadCard() {
       <br />
       <br />
 
-      <button disabled={!selectedFile}>
+      <button
+        onClick={handleAnalyze}
+        disabled={!selectedFile}
+      >
         Analyze
       </button>
     </div>
