@@ -9,7 +9,9 @@ class SpeechService:
         self.model = WhisperModel(
             "tiny",
             device="cpu",
-            compute_type="int8"
+            compute_type="int8",
+            cpu_threads=8,
+            num_workers=4
         )
 
         print("Whisper model loaded successfully.")
@@ -21,13 +23,14 @@ class SpeechService:
             segments, info = self.model.transcribe(
                 audio_path,
                 language="en",
+                beam_size=1,
                 vad_filter=True
             )
 
             transcript = ""
 
             for segment in segments:
-                transcript += segment.text
+                transcript += segment.text + " "
 
             print("Transcription completed.")
 
