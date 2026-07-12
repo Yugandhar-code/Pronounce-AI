@@ -66,7 +66,7 @@ function UploadCard({setAnalysisResult }) {
     formData.append("audio", selectedFile);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/upload", {
+      const response = await fetch("https://pronounce-ai-jh40.onrender.com/upload", {
         method: "POST",
         body: formData,
       });
