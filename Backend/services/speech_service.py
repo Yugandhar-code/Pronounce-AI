@@ -10,8 +10,8 @@ class SpeechService:
             "tiny",
             device="cpu",
             compute_type="int8",
-            cpu_threads=8,
-            num_workers=4
+            cpu_threads=2,
+            num_workers=1
         )
 
         print("Whisper model loaded successfully.")
