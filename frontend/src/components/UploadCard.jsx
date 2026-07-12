@@ -1,41 +1,87 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
-function UploadCard() {
+function UploadCard({setAnalysisResult }) {
   const [selectedFile, setSelectedFile] = useState(null);
+  
+  const [duration, setDuration] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Handles file selection
+  const fileInputRef = useRef(null);
+
+  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file);
+
+    if (!file) return;
+
+    setError("");
+    setDuration(null);
+    setAnalysisResult(null);
+
+    const audio = new Audio();
+    const objectURL = URL.createObjectURL(file);
+
+    audio.src = objectURL;
+
+    audio.onloadedmetadata = () => {
+      const audioDuration = audio.duration;
+
+      setDuration(audioDuration);
+      setSelectedFile(file);
+
+      if (audioDuration < 30 || audioDuration > 45) {
+        setError("Audio must be between 30 and 45 seconds.");
+      } else {
+        setError("");
+      }
+
+      URL.revokeObjectURL(objectURL);
+    };
   };
 
-  // Handles removing the selected file
+  // Remove selected file
   const handleRemoveFile = () => {
     setSelectedFile(null);
+    setAnalysisResult(null);
+    setDuration(null);
+    setError("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
+  // Send file to backend
   const handleAnalyze = async () => {
-  if (!selectedFile) {
-    alert("Please select an audio file first.");
-    return;
-  }
+    if (!selectedFile) {
+      alert("Please select an audio file first.");
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append("audio", selectedFile);
+    setLoading(true);
+    setAnalysisResult(null);
 
-  try {
-    const response = await fetch("http://127.0.0.1:8000/upload", {
-      method: "POST",
-      body: formData,
-    });
+    const formData = new FormData();
+    formData.append("audio", selectedFile);
 
-    const data = await response.json();
+    try {
+      const response = await fetch("http://127.0.0.1:8000/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    console.log("Backend Response:", data);
-  } catch (error) {
-    console.error("Upload failed:", error);
-  }
-};
+      const data = await response.json();
+
+      console.log(data);
+
+      setAnalysisResult(data);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="upload-card">
@@ -46,32 +92,63 @@ function UploadCard() {
       </p>
 
       <input
+        ref={fileInputRef}
+        id="audio-upload"
         type="file"
         accept="audio/*"
         onChange={handleFileChange}
+        hidden
       />
 
-      <p>
-        {selectedFile
-          ? `Selected File: ${selectedFile.name}`
-          : "No file selected"}
-      </p>
+      <label htmlFor="audio-upload" className="upload-btn">
+        📁 Choose Audio File
+      </label>
 
       {selectedFile && (
-        <button onClick={handleRemoveFile}>
-          Remove File
-        </button>
+        <div className="file-info">
+          <div className="file-name">
+            📄 {selectedFile.name}
+          </div>
+
+          {duration && (
+            <div className="file-duration">
+              {duration.toFixed(1)} seconds
+            </div>
+          )}
+        </div>
       )}
 
-      <br />
-      <br />
+      {error && (
+        <p style={{ color: "red" }}>
+          {error}
+        </p>
+      )}
 
-      <button
-        onClick={handleAnalyze}
-        disabled={!selectedFile}
-      >
-        Analyze
-      </button>
+      <div className="button-group">
+        {selectedFile && (
+          <button
+            className="remove-btn"
+            onClick={handleRemoveFile}
+          >
+            Remove
+          </button>
+        )}
+
+        <button
+          className="analyze-btn"
+          onClick={handleAnalyze}
+          disabled={!selectedFile || error || loading}
+        >
+          {loading ? (
+            <>
+              <span className="loader"></span>
+              <span>Analyzing...</span>
+            </>
+          ) : (
+            "Analyze"
+          )}
+        </button>
+      </div>
     </div>
   );
 }
