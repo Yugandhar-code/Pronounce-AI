@@ -66,7 +66,7 @@ class AnalysisService:
         score -= hesitations * 2
 
         # Clamp score
-        score = max(55, min(score, 98))
+        score = max(0, min(score, 98))
 
         # --------------------------
         # Feedback
