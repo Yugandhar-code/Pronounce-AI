@@ -1,21 +1,23 @@
 import os
 import tempfile
+
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from services.speech_service import SpeechService
 from services.analysis_service import AnalysisService
 
-from fastapi import FastAPI, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-
 app = FastAPI()
-
-
 
 speech_service = SpeechService()
 analysis_service = AnalysisService()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://pronounce-ai-nine.vercel.app/"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://pronounce-ai-nine.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,7 +33,6 @@ def home():
 
 @app.post("/upload")
 async def upload_audio(audio: UploadFile = File(...)):
-
     suffix = os.path.splitext(audio.filename)[1]
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
@@ -39,8 +40,13 @@ async def upload_audio(audio: UploadFile = File(...)):
         temp_path = temp_file.name
 
     try:
+        print(f"Received file: {audio.filename}")
+
         transcript = speech_service.transcribe_audio(temp_path)
+
         analysis = analysis_service.analyze(transcript)
+
+        print("Analysis completed successfully.")
 
         return {
             "transcript": transcript,
@@ -49,5 +55,10 @@ async def upload_audio(audio: UploadFile = File(...)):
             "mistakes": analysis["mistakes"]
         }
 
+    except Exception as e:
+        print(f"Backend Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
     finally:
-        os.remove(temp_path)
+        if os.path.exists(temp_path):
+            os.remove(temp_path)

@@ -1,15 +1,13 @@
 import { useState, useRef } from "react";
 
-function UploadCard({setAnalysisResult }) {
+function UploadCard({ setAnalysisResult }) {
   const [selectedFile, setSelectedFile] = useState(null);
-  
   const [duration, setDuration] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef(null);
 
-  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
 
@@ -40,7 +38,6 @@ function UploadCard({setAnalysisResult }) {
     };
   };
 
-  // Remove selected file
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setAnalysisResult(null);
@@ -52,7 +49,6 @@ function UploadCard({setAnalysisResult }) {
     }
   };
 
-  // Send file to backend
   const handleAnalyze = async () => {
     if (!selectedFile) {
       alert("Please select an audio file first.");
@@ -66,18 +62,23 @@ function UploadCard({setAnalysisResult }) {
     formData.append("audio", selectedFile);
 
     try {
-      const response = await fetch("https://pronounce-ai-jh40.onrender.com/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://pronounce-ai-jh40.onrender.com/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Server returned an error.");
+      }
 
       const data = await response.json();
-
-      console.log(data);
-
       setAnalysisResult(data);
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error(error);
+      alert(error.message);
     } finally {
       setLoading(false);
     }
@@ -106,9 +107,7 @@ function UploadCard({setAnalysisResult }) {
 
       {selectedFile && (
         <div className="file-info">
-          <div className="file-name">
-            📄 {selectedFile.name}
-          </div>
+          <div className="file-name">📄 {selectedFile.name}</div>
 
           {duration && (
             <div className="file-duration">
@@ -118,18 +117,11 @@ function UploadCard({setAnalysisResult }) {
         </div>
       )}
 
-      {error && (
-        <p style={{ color: "red" }}>
-          {error}
-        </p>
-      )}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div className="button-group">
         {selectedFile && (
-          <button
-            className="remove-btn"
-            onClick={handleRemoveFile}
-          >
+          <button className="remove-btn" onClick={handleRemoveFile}>
             Remove
           </button>
         )}
@@ -137,7 +129,7 @@ function UploadCard({setAnalysisResult }) {
         <button
           className="analyze-btn"
           onClick={handleAnalyze}
-          disabled={!selectedFile || error || loading}
+          disabled={!selectedFile || !!error || loading}
         >
           {loading ? (
             <>
