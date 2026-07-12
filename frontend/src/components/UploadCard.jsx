@@ -63,7 +63,7 @@ function UploadCard({ setAnalysisResult }) {
 
     try {
       const response = await fetch(
-        "https://pronounce-ai-jh40.onrender.com/upload",
+        "https://pronounce-ai-jh40.onrender.com",
         {
           method: "POST",
           body: formData,
