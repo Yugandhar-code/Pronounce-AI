@@ -1,25 +1,37 @@
-import whisper
+from faster_whisper import WhisperModel
 
 
 class SpeechService:
 
     def __init__(self):
         print("Loading Whisper model...")
-        self.model = whisper.load_model("tiny")
+
+        self.model = WhisperModel(
+            "tiny",
+            device="cpu",
+            compute_type="int8"
+        )
+
         print("Whisper model loaded successfully.")
 
     def transcribe_audio(self, audio_path):
         try:
             print("Starting transcription...")
 
-            result = self.model.transcribe(
+            segments, info = self.model.transcribe(
                 audio_path,
-                language="en"
+                language="en",
+                vad_filter=True
             )
+
+            transcript = ""
+
+            for segment in segments:
+                transcript += segment.text
 
             print("Transcription completed.")
 
-            return result["text"]
+            return transcript.strip()
 
         except Exception as e:
             print(f"Transcription failed: {e}")
