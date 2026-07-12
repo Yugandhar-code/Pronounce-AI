@@ -1,11 +1,12 @@
 import os
 import tempfile
-
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+import time
 
 from services.speech_service import SpeechService
 from services.analysis_service import AnalysisService
+
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -14,10 +15,7 @@ analysis_service = AnalysisService()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://pronounce-ai-nine.vercel.app"
-    ],
+    allow_origins=["https://pronounce-ai-nine.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,6 +31,13 @@ def home():
 
 @app.post("/upload")
 async def upload_audio(audio: UploadFile = File(...)):
+
+    total_start = time.time()
+
+    print("=" * 60)
+    print("New upload received")
+    print(f"Filename: {audio.filename}")
+
     suffix = os.path.splitext(audio.filename)[1]
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
@@ -40,13 +45,39 @@ async def upload_audio(audio: UploadFile = File(...)):
         temp_path = temp_file.name
 
     try:
-        print(f"Received file: {audio.filename}")
+
+        print("Starting Whisper transcription...")
+        transcription_start = time.time()
 
         transcript = speech_service.transcribe_audio(temp_path)
 
+        transcription_end = time.time()
+
+        print(
+            f"Whisper completed in "
+            f"{transcription_end - transcription_start:.2f} seconds"
+        )
+
+        print("Starting analysis...")
+        analysis_start = time.time()
+
         analysis = analysis_service.analyze(transcript)
 
-        print("Analysis completed successfully.")
+        analysis_end = time.time()
+
+        print(
+            f"Analysis completed in "
+            f"{analysis_end - analysis_start:.2f} seconds"
+        )
+
+        total_end = time.time()
+
+        print(
+            f"TOTAL REQUEST TIME: "
+            f"{total_end - total_start:.2f} seconds"
+        )
+
+        print("=" * 60)
 
         return {
             "transcript": transcript,
@@ -55,10 +86,5 @@ async def upload_audio(audio: UploadFile = File(...)):
             "mistakes": analysis["mistakes"]
         }
 
-    except Exception as e:
-        print(f"Backend Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
     finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+        os.remove(temp_path)
