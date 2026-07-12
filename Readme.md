@@ -1,12 +1,12 @@
 # 🎙️ PronounceAI
 
-An AI-powered English Pronunciation Analyzer built using **React**, **FastAPI**, and **OpenAI Whisper**.
+An AI-powered English Pronunciation Analyzer built using **React**, **FastAPI**, and **faster-whisper**.
 
-Upload a 30–45 second English audio recording and receive:
+PronounceAI allows users to upload a 30–45 second English audio recording and receive:
 - Automatic speech transcription
 - Pronunciation score
 - AI-generated pronunciation feedback
-- Suggested words to improve
+- Suggested words for improvement
 
 ---
 
@@ -30,36 +30,44 @@ Upload a 30–45 second English audio recording and receive:
 
 ---
 
-## ✨ Features
+# ✨ Features
 
 - 🎤 Upload English audio recordings (30–45 seconds)
-- 📝 AI-powered speech transcription using Whisper
-- 📊 Pronunciation scoring
+- 📝 AI-powered speech transcription using faster-whisper
+- 📊 Pronunciation scoring system
 - 💬 Personalized pronunciation feedback
 - 🎯 Suggested words for improvement
 - 🚫 Silent audio detection
+- ⚡ Optimized speech processing pipeline
 - 📱 Clean and responsive user interface
 
 ---
 
-## 🛠 Tech Stack
+# 🛠 Tech Stack
 
-### Frontend
+## Frontend
 
 - React
 - Vite
 - CSS3
 
-### Backend
+## Backend
 
 - FastAPI
 - Python
-- OpenAI Whisper
+- faster-whisper
+- CTranslate2
 - FFmpeg
+
+## AI Pipeline
+
+- Speech-to-text transcription using faster-whisper
+- Transcript-based pronunciation analysis
+- Automated feedback generation
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
 ```
 Pronounce-AI
@@ -91,9 +99,9 @@ Pronounce-AI
 
 ---
 
-## 🚀 Getting Started
+# 🚀 Getting Started
 
-### 1. Clone the repository
+## 1. Clone the repository
 
 ```bash
 git clone https://github.com/Yugandhar-code/Pronounce-AI.git
@@ -105,39 +113,41 @@ cd Pronounce-AI
 
 ---
 
-## Backend Setup
+# Backend Setup
 
-```
+Navigate to backend:
+
+```bash
 cd Backend
 ```
 
-Create a virtual environment
+Create a virtual environment:
 
 ```bash
 python -m venv venv
 ```
 
-Activate it
+Activate environment:
 
-Windows
+### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the FastAPI server
+Run FastAPI server:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Backend runs on
+Backend runs on:
 
 ```
 http://127.0.0.1:8000
@@ -145,25 +155,27 @@ http://127.0.0.1:8000
 
 ---
 
-## Frontend Setup
+# Frontend Setup
 
-```
+Navigate to frontend:
+
+```bash
 cd frontend
 ```
 
-Install packages
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Run the development server
+Run development server:
 
 ```bash
 npm run dev
 ```
 
-Frontend runs on
+Frontend runs on:
 
 ```
 http://localhost:5173
@@ -171,40 +183,74 @@ http://localhost:5173
 
 ---
 
-## How It Works
+# 🔄 How It Works
 
 1. User uploads an English audio recording.
-2. Backend receives the audio.
-3. Whisper transcribes the speech.
-4. Transcript is analyzed.
-5. Pronunciation score and feedback are generated.
-6. Results are displayed in the React frontend.
+2. React frontend sends the audio file to the FastAPI backend.
+3. Backend processes the audio using faster-whisper.
+4. Speech is converted into text.
+5. Transcript is analyzed for pronunciation patterns.
+6. A pronunciation score and improvement suggestions are generated.
+7. Results are displayed in the frontend.
 
 ---
 
-## Current Limitations
+# ⚡ Performance Optimization
 
-- Pronunciation score is generated using a heuristic analysis based on transcript characteristics.
+The speech processing pipeline was optimized using:
+
+- faster-whisper instead of standard Whisper inference
+- INT8 quantized model execution
+- CPU optimized inference configuration
+- Voice Activity Detection (VAD) filtering
+
+These optimizations reduce transcription latency while maintaining accurate speech recognition.
+
+---
+
+# 🚀 Deployment
+
+The application is deployed with:
+
+- React frontend hosting
+- FastAPI backend deployment
+- Production AI inference pipeline
+
+Live Demo:
+
+```
+https://pronounce-ai-nine.vercel.app/
+```
+
+---
+
+# ⚠️ Current Limitations
+
+- Pronunciation scoring is currently based on transcript-level analysis.
 - Supports English audio only.
-- Requires a local Whisper model and FFmpeg installation.
+- Advanced phoneme-level pronunciation comparison is not implemented yet.
+- GPU acceleration is not currently enabled.
 
 ---
 
-## Future Improvements
+# 🔮 Future Improvements
 
 - Real phoneme-level pronunciation assessment
 - Audio waveform visualization
-- Audio playback
+- Audio playback support
 - Speech confidence visualization
 - User authentication
-- History of previous analyses
-- Cloud deployment
+- Analysis history dashboard
+- Advanced AI pronunciation coaching
+- GPU-based inference optimization
 
 ---
 
-## Author
+# 👨‍💻 Author
 
 **Yugandhar**
 
 GitHub:
+
 https://github.com/Yugandhar-code
+
