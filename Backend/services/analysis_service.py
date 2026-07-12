@@ -5,19 +5,41 @@ class AnalysisService:
 
     def analyze(self, transcript: str):
 
-        words = re.findall(r"\b[\w']+\b", transcript)
+        # --------------------------
+        # Empty / invalid transcript
+        # --------------------------
+        if not transcript or transcript.strip() == "":
+            return {
+                "score": 0,
+                "feedback": "No speech detected. Please upload a clear English recording.",
+                "mistakes": [],
+                "transcript": ""
+            }
 
+        words = re.findall(r"\b[\w']+\b", transcript)
         word_count = len(words)
 
+        # Whisper sometimes returns only a few random words
+        if word_count < 5:
+            return {
+                "score": 20,
+                "feedback": "Very little speech was detected. Please speak clearly for 30–45 seconds.",
+                "mistakes": [],
+                "transcript": transcript
+            }
+
+        # --------------------------
+        # Initial score
+        # --------------------------
         score = 95
 
-        # Too few words → likely slow or poor recognition
+        # Penalize short transcript
         if word_count < 60:
             score -= 15
         elif word_count < 80:
             score -= 8
 
-        # Repeated consecutive words
+        # Penalize repeated consecutive words
         repeated = 0
 
         for i in range(1, len(words)):
@@ -26,7 +48,7 @@ class AnalysisService:
 
         score -= repeated * 3
 
-        # Hesitation words
+        # Penalize hesitation words
         hesitation_words = [
             "um",
             "uh",
@@ -43,20 +65,27 @@ class AnalysisService:
 
         score -= hesitations * 2
 
-        # Keep score in a realistic range
+        # Clamp score
         score = max(55, min(score, 98))
 
+        # --------------------------
         # Feedback
+        # --------------------------
         if score >= 90:
             feedback = "Excellent pronunciation with clear and fluent speech."
+
         elif score >= 80:
             feedback = "Good pronunciation. A little more clarity would improve fluency."
+
         elif score >= 70:
             feedback = "Fair pronunciation. Focus on speaking more clearly and confidently."
+
         else:
             feedback = "Pronunciation needs improvement. Slow down and articulate words more clearly."
 
-        # Words to improve
+        # --------------------------
+        # Difficult words
+        # --------------------------
         difficult_words = []
 
         for word in words:
@@ -76,5 +105,6 @@ class AnalysisService:
         return {
             "score": score,
             "feedback": feedback,
-            "mistakes": mistakes
+            "mistakes": mistakes,
+            "transcript": transcript
         }
